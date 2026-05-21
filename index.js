@@ -50,14 +50,9 @@ const verifyToken = async (req, res, next) => {
         req.user = payload;
 
         next();
-        // console.log('Token is valid:', payload)
     } catch (error) {
-        // console.error('Token validation failed:', error)
         return res.status(401).json({ message: 'Unauthorized access' });
     }
-
-    // console.log(req.headers);
-    // next();
 }
 
 async function run() {
