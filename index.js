@@ -57,17 +57,11 @@ const verifyToken = async (req, res, next) => {
 
 async function run() {
   try {
-    // Connect the client to the server	(optional starting in v4.7)
-    // await client.connect();
-    
-
-
     const db = client.db('teacherkhujidb');
     const collection = db.collection('teachers');
     const bookingCollection = db.collection('bookings');
 
     app.get('/tutors', async (req, res) => {
-        // console.log(req.query)
         const cursor = collection.find();
         const tutors = await cursor.toArray();
         res.send(tutors);
