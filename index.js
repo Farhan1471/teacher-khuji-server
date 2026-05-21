@@ -130,6 +130,7 @@ async function run() {
 
         const result = await bookingCollection.insertOne({
             ...bookingData,
+            status: 'booked',
             bookedAt: new Date(),
         });
         res.send(result);
@@ -141,10 +142,48 @@ async function run() {
         res.send(result);
     });
 
+    app.patch('/bookings/:id/cancel', async (req, res) => {
+        const { id } = req.params;
+        const result = await bookingCollection.updateOne(
+            { _id: new ObjectId(id) },
+            { $set: { status: 'cancelled' } }
+        );
+
+        res.send(result);
+    });
+
     app.post('/tutors', async (req, res) => {
         const tutorData = normalizeTutorData(req.body);
         const result = await collection.insertOne(tutorData);
         res.send(result);
+    });
+
+    app.patch('/updatetutors/:id', verifyToken, async (req, res) => {
+        const id = req.params.id;
+        
+            if (!ObjectId.isValid(id)) {
+                return res.status(400).json({ message: 'Invalid tutor id' });
+            }
+
+            const tutor = await collection.findOne({
+                _id: new ObjectId(id),
+                addedBy: req.user?.email,
+            });
+
+            if (!tutor) {
+                return res.status(404).json({ message: 'Tutor not found or you don\'t have permission to update' });
+            }
+
+            const updateData = normalizeTutorData(req.body);
+            
+            delete updateData._id;
+            delete updateData.addedBy;
+            
+            const result = await collection.updateOne(
+                { _id: new ObjectId(id) },
+                { $set: updateData }
+            );
+            res.send(result);
     });
 
     app.patch('/tutors/:id', verifyToken, async (req, res) => {
@@ -156,6 +195,24 @@ async function run() {
         );
         res.send(result);
     });
+ 
+    app.delete('/tutors/:id', verifyToken, async (req, res) => {
+        const { id } = req.params;
+        if (!ObjectId.isValid(id)) {
+            return res.status(400).json({ message: 'Invalid tutor id' });
+        }
+
+        const result = await collection.deleteOne({
+            _id: new ObjectId(id),
+            addedBy: req.user?.email,
+        });
+
+        if (result.deletedCount === 0) {
+            return res.status(404).json({ message: 'Tutor not found or not yours' });
+        }
+
+        res.send({ message: 'Tutor deleted successfully' });
+    }); 
 
     
 }
