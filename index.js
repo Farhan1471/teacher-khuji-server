@@ -232,6 +232,3 @@ app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`);
 }
 );
-
-// teacherkhuji
-// 1q6lcb7EmOC507w3
