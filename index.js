@@ -52,7 +52,7 @@ const verifyToken = async (req, res, next) => {
         next();
         // console.log('Token is valid:', payload)
     } catch (error) {
-        console.error('Token validation failed:', error)
+        // console.error('Token validation failed:', error)
         return res.status(401).json({ message: 'Unauthorized access' });
     }
 
@@ -63,24 +63,27 @@ const verifyToken = async (req, res, next) => {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
-    // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
-  } finally {
-    // Ensures that the client will close when you finish/error
-    // await client.close();
+    // await client.connect();
+    
+
 
     const db = client.db('teacherkhujidb');
     const collection = db.collection('teachers');
     const bookingCollection = db.collection('bookings');
 
     app.get('/tutors', async (req, res) => {
-        console.log(req.query)
+        // console.log(req.query)
         const cursor = collection.find();
         const tutors = await cursor.toArray();
         res.send(tutors);
       
+    });
+
+    app.get('/tutors/search', async (req, res) => {
+        const { name } = req.query;
+        const query = { name: { $regex: name, $options: 'i' } };
+        const tutors = await collection.find(query).toArray();
+        res.send(tutors);
     });
 
     app.get('/tutors/addedBy/:email', async (req, res) => {
@@ -94,6 +97,20 @@ async function run() {
         const tutors = await cursor.toArray();
         res.send(tutors);
       
+    });
+
+    app.get('/tutors/session-start/filter', async (req, res) => {
+        const { startDate, endDate } = req.query;
+        const query = {};
+
+        if (startDate || endDate) {
+            query.sessionStartDate = {};
+            if (startDate) query.sessionStartDate.$gte = startDate;
+            if (endDate) query.sessionStartDate.$lte = endDate;
+        }
+
+        const tutors = await collection.find(query).toArray();
+        res.send(tutors);
     });
 
     app.get('/tutors/:id', logger, verifyToken, async (req, res) => {
@@ -215,7 +232,15 @@ async function run() {
     }); 
 
     
-}
+
+
+
+// Send a ping to confirm a successful connection
+    // await client.db("admin").command({ ping: 1 });
+    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+  } finally {
+    // await client.close();
+  }
 }
 run().catch(console.dir);
 
