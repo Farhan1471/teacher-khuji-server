@@ -132,7 +132,6 @@ async function run() {
         );
 
         const bookingData = req.body;
-        // console.log(bookingData);
 
         const result = await bookingCollection.insertOne({
             ...bookingData,
