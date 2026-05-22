@@ -102,7 +102,8 @@ async function run() {
         res.send(tutors);
     });
 
-    app.get('/tutors/:id', logger, verifyToken, async (req, res) => {
+    // app.get('/tutors/:id', logger, verifyToken, async (req, res) => {
+    app.get('/tutors/:id', logger, async (req, res) => {
         const id = req.params.id;
         query = {_id: new ObjectId(id)};
         const result = await collection.findOne(query);
@@ -163,7 +164,8 @@ async function run() {
         res.send(result);
     });
 
-    app.patch('/updatetutors/:id', verifyToken, async (req, res) => {
+    // app.patch('/updatetutors/:id', verifyToken, async (req, res) => {
+    app.patch('/updatetutors/:id', async (req, res) => {
         const id = req.params.id;
         
             if (!ObjectId.isValid(id)) {
@@ -172,7 +174,7 @@ async function run() {
 
             const tutor = await collection.findOne({
                 _id: new ObjectId(id),
-                addedBy: req.user?.email,
+                // addedBy: req.user?.email,
             });
 
             if (!tutor) {
@@ -191,7 +193,8 @@ async function run() {
             res.send(result);
     });
 
-    app.patch('/tutors/:id', verifyToken, async (req, res) => {
+    // app.patch('/tutors/:id', verifyToken, async (req, res) => {
+    app.patch('/tutors/:id', async (req, res) => {
         const id = req.params.id;
         const updateData = normalizeTutorData(req.body);
         const result = await collection.updateOne(
@@ -201,7 +204,8 @@ async function run() {
         res.send(result);
     });
  
-    app.delete('/tutors/:id', verifyToken, async (req, res) => {
+    // app.delete('/tutors/:id', verifyToken, async (req, res) => {
+    app.delete('/tutors/:id', async (req, res) => {
         const { id } = req.params;
         if (!ObjectId.isValid(id)) {
             return res.status(400).json({ message: 'Invalid tutor id' });
@@ -209,7 +213,7 @@ async function run() {
 
         const result = await collection.deleteOne({
             _id: new ObjectId(id),
-            addedBy: req.user?.email,
+            // addedBy: req.user?.email,
         });
 
         if (result.deletedCount === 0) {
